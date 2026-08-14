@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+*/node_modules/
+package-lock.json
+
+# Production builds
+dist/
+build/
+client/dist/
+desktop/dist/
+
+# Databases & logs
+*.db
+*.db-journal
+*.log
+logs/
+backend/*.db
+backend/*.db-journal
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

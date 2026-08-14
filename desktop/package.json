@@ -1,0 +1,14 @@
+{
+  "name": "friday-desktop",
+  "version": "1.0.0",
+  "description": "F.R.I.D.A.Y. Voice Assistant Desktop Shell for Windows and macOS",
+  "main": "electron-main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^34.2.0"
+  }
+}
