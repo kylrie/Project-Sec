@@ -100,9 +100,20 @@ router.all(['/tts/stream'], async (req, res) => {
 router.post('/voices/preview', async (req, res) => {
   try {
     const { voiceId, text, settings } = req.body;
-    const preview = await enhancedTTSService.generatePreviewAudio(voiceId, text, settings);
+    const defaultText = text || 'Hello, I am F.R.I.D.A.Y., your AI voice secretary.';
+    const audioBuffer = await enhancedTTSService.synthesizeRawAudio(defaultText, voiceId, settings);
+
     res.setHeader('X-Voice-Model', MODEL_ID);
     res.setHeader('X-Audio-Format', OUTPUT_FORMAT);
+
+    if (audioBuffer) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Length', audioBuffer.length);
+      return res.send(audioBuffer);
+    }
+
+    // Fallback JSON if no API key
+    const preview = await enhancedTTSService.synthesize(defaultText, {}, voiceId, settings);
     res.json({ success: true, ...preview });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

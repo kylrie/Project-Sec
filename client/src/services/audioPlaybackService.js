@@ -82,6 +82,37 @@ class AudioPlaybackService {
             return true;
           }
         }
+      } else if (response.ok && contentType && contentType.includes('application/json')) {
+        const json = await response.json();
+        if (json.audioUrl) {
+          console.log('[AudioPlaybackService] Received JSON with base64 audio, decoding...');
+          const base64Data = json.audioUrl.replace(/^data:audio\/\w+;base64,/, '');
+          const binaryString = window.atob(base64Data);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+              bytes[i] = binaryString.charCodeAt(i);
+          }
+          const arrayBuffer = bytes.buffer;
+
+          const ctx = this.getAudioContext();
+          if (ctx) {
+            const decodedBuffer = await ctx.decodeAudioData(arrayBuffer);
+            const source = ctx.createBufferSource();
+            source.buffer = decodedBuffer;
+            source.connect(ctx.destination);
+
+            source.onended = () => {
+              this.setPlaying(false);
+              this.currentSource = null;
+            };
+
+            source.start(0);
+            this.currentSource = source;
+            console.log('[AudioPlaybackService] Playing base64 Audio Duration:', decodedBuffer.duration.toFixed(2) + 's');
+            return true;
+          }
+        }
       }
 
       // Fallback: Web Speech API with mapped human voice characteristics

@@ -6,18 +6,16 @@ export const HIGH_QUALITY_VOICE_IDS = [
   'XrExE9yKIg1WjnnlVkGX', // Matilda — expressive, clear
   'TxGEqnHWrfWFTfGW9XjX', // Josh — natural, professional
   'VR6AewLTigWG4xSOukaG', // Adam (newer version) — deep, warm
-  'pNInz6obpgDQGcFmaJgB', // Adam — classic but good
-  'onwK4e9ZLuTAKqW03Ge9', // Nicole — soft, natural
-  'MF3mGyEYCl7XYWbV9V6O', // Elli — young, natural
-  'LcfcDJNUP1GQjkzn1xUU', // Emily — warm, conversational
-  'ZQe5CZNOzWyzPSCn5a3c', // Daniel — professional, natural
-  'N2lVS1w4EtoT3dr4eOWO', // Callum — Scottish, very natural
-  'ODq5zmih8GrVes37Dizd', // Patrick — news anchor quality
-  'SOYHLrjzK2X1ezoPC6w8', // Harry — British, natural
-  'TX3AE3VoIzMeN6BkYKdN', // Liam — American, natural
-  'XHarm0bPFKD7b8P8n8OQ', // Jessica — expressive, warm
-  '21m00Tcm4TlvDq8ikWAM', // Friday Pro (HD)
-  'AZnzlk1XvdvUeBnXmlld'  // Warm Secretary
+  'XB0fDUnXU5powFXDhCwa', // Charlotte
+  'XrExE9yKIg1WjnnlVkGX', // Matilda
+  'TxGEqnHWrfWFTfGW9XjX', // Josh
+  'LcfcDJNUP1GQjkzn1xUU', // Emily
+  'N2lVS1w4EtoT3dr4eOWO', // Callum
+  'ODq5zmih8GrVes37Dizd', // Patrick
+  'SOYHLrjzK2X1ezoPC6w8', // Harry
+  'VR6AewLTigWG4xSOukaG', // Adam NEW
+  'en-US-JennyNeural',
+  'AVSpeechSynthesisVoice_en_US'
 ];
 
 export function filterQualityVoices(allVoices = []) {
