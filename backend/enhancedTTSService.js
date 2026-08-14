@@ -310,7 +310,12 @@ export class EnhancedTTSService {
 
     if (apiKey && apiKey !== 'mock_elevenlabs_api_key' && voice.provider === 'elevenlabs') {
       try {
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.provider_voice_id}?output_format=${OUTPUT_FORMAT}`, {
+        // If it's a simulated cloned voice with local ID, map to high-quality base ElevenLabs voice
+        const effectiveVoiceId = (voice.provider_voice_id && voice.provider_voice_id.length >= 20 && !voice.provider_voice_id.startsWith('eleven_clone_'))
+          ? voice.provider_voice_id
+          : 'EXAVITQu4vr4xnSDxMaL'; // Sarah (Default ElevenLabs voice)
+
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${effectiveVoiceId}?output_format=${OUTPUT_FORMAT}`, {
           method: 'POST',
           headers: {
             'xi-api-key': apiKey,

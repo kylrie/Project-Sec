@@ -57,8 +57,12 @@ router.all(['/tts/stream'], async (req, res) => {
     res.setHeader('X-Audio-Format', OUTPUT_FORMAT);
 
     if (apiKey && apiKey !== 'mock_elevenlabs_api_key' && voice.provider === 'elevenlabs') {
+      const effectiveVoiceId = (voice.provider_voice_id && voice.provider_voice_id.length >= 20 && !voice.provider_voice_id.startsWith('eleven_clone_'))
+        ? voice.provider_voice_id
+        : 'EXAVITQu4vr4xnSDxMaL';
+
       const response = await fetch(
-        `https://api.elevenlabs.io/v1/text-to-speech/${voice.provider_voice_id}/stream?output_format=${OUTPUT_FORMAT}`,
+        `https://api.elevenlabs.io/v1/text-to-speech/${effectiveVoiceId}/stream?output_format=${OUTPUT_FORMAT}`,
         {
           method: 'POST',
           headers: {
