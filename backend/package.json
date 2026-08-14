@@ -12,8 +12,9 @@
     "test:comm": "node testCommEngine.js",
     "test:prod": "node testProductionSuite.js",
     "test:voice": "node testVoiceEngine.js",
+    "test:streaming": "node testStreamingPipeline.js",
     "diagnostic": "node diagnostic.js",
-    "test": "node test.js && node testWorkspace.js && node testMeetingEngine.js && node testCommEngine.js && node testProductionSuite.js && node testVoiceEngine.js"
+    "test": "node test.js && node testWorkspace.js && node testMeetingEngine.js && node testCommEngine.js && node testProductionSuite.js && node testVoiceEngine.js && node testStreamingPipeline.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

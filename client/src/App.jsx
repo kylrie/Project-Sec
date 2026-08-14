@@ -17,8 +17,9 @@ import DndToggleWidget from './components/DndToggleWidget';
 import SecretaryBrainHUD from './components/SecretaryBrainHUD';
 import AuditLogModal from './components/AuditLogModal';
 import VoiceOnboardingModal from './components/VoiceOnboardingModal';
-import AdminDashboard from './components/AdminDashboard';
 import VoiceStudioPanel from './components/VoiceStudioPanel';
+import LatencyDebugPanel from './components/LatencyDebugPanel';
+import { streamingClient } from './services/streamingClient';
 
 import { socketService } from './services/socketService';
 import { audioService } from './services/audioService';
@@ -61,6 +62,7 @@ export default function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showVoiceStudio, setShowVoiceStudio] = useState(false);
+  const [showLatencyPanel, setShowLatencyPanel] = useState(false);
 
   // Settings state
   const [wakeWord, setWakeWord] = useState('hey friday');
@@ -68,14 +70,16 @@ export default function App() {
   const [speed, setSpeed] = useState(1.0);
   const [pitch, setPitch] = useState(1.0);
 
-  // Global Keyboard Shortcut `V` to open Voice Studio
+  // Global Keyboard Shortcuts (`V` -> Voice Studio, `L` -> Latency Telemetry HUD)
   useEffect(() => {
     fetchVoices();
 
     const handleKeyDown = (e) => {
-      if (e.key === 'v' || e.key === 'V') {
-        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        if (e.key === 'v' || e.key === 'V') {
           setShowVoiceStudio(prev => !prev);
+        } else if (e.key === 'l' || e.key === 'L') {
+          setShowLatencyPanel(prev => !prev);
         }
       }
     };
@@ -259,6 +263,10 @@ export default function App() {
 
           <button className="hud-btn active" onClick={() => setShowVoiceStudio(true)} title="Voice Studio (Press 'V')">
             <Volume2 size={15} /> Voice Studio {activeVoice ? `(${activeVoice.name.split(' ')[0]})` : ''}
+          </button>
+
+          <button className="hud-btn" onClick={() => setShowLatencyPanel(true)} title="Streaming Latency Telemetry (Press 'L')">
+            <Activity size={15} color="#00f3ff" /> Telemetry
           </button>
 
           <button className="hud-btn" onClick={() => setShowOnboarding(true)} title="5-Minute Setup">
@@ -486,6 +494,12 @@ export default function App() {
         meetingInfo={meetingSummary?.meeting}
         onClose={() => setMeetingSummary(null)}
         onExportPDF={handleExportPDF}
+      />
+
+      {/* Latency Telemetry Debug HUD Modal */}
+      <LatencyDebugPanel
+        isOpen={showLatencyPanel}
+        onClose={() => setShowLatencyPanel(false)}
       />
     </div>
   );

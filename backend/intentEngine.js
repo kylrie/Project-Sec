@@ -35,6 +35,15 @@ export async function processIntent(text, personality = 'professional') {
     };
   }
 
+  // 1.5 Quick Greetings & Instant Acknowledgments
+  if (normalized === 'good morning' || normalized === 'hello' || normalized === 'hi' || normalized === 'hey friday') {
+    return {
+      intent: 'GREETING',
+      response: formatResponse('Good morning, boss. Ready when you are.', 'Hey boss! What can I do for you?', 'Online and ready.', personality),
+      actionPayload: { greeting: true }
+    };
+  }
+
   // 2. Morning Briefing 2.0 ("Good morning", "Morning briefing 2.0", "Run briefing")
   if (normalized.includes('briefing 2') || (normalized.includes('morning') && normalized.includes('briefing')) || normalized.includes('secretary brain')) {
     const briefing2Res = await secretaryBrain.getMorningBriefing2(personality);

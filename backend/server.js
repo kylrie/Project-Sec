@@ -39,6 +39,7 @@ import { predictivePrepEngine } from './predictivePrepEngine.js';
 import { auditLogger } from './auditLogger.js';
 import { feedbackEngine } from './feedbackEngine.js';
 import { enhancedTTSService } from './enhancedTTSService.js';
+import { streamingServer } from './streamingServer.js';
 import voiceRoutes from './voiceRoutes.js';
 
 const PORT = process.env.PORT || 3001;
@@ -384,12 +385,27 @@ wss.on('connection', (ws) => {
 
         case 'BARGE_IN':
           console.log('[WS] Barge-in signal received.');
-          ws.send(JSON.stringify({
-            type: 'TTS_ABORTED',
-            reason: payload.reason || 'User interrupted speech',
-            timestamp: Date.now()
-          }));
+          streamingServer.handleBargeIn(ws, payload.reason || 'User interrupted speech');
           break;
+
+        case 'VOICE_CHUNK':
+        case 'voice_chunk':
+          await streamingServer.handleVoiceChunk(ws, payload);
+          break;
+
+        case 'VOICE_END':
+        case 'voice_end':
+          await streamingServer.handleVoiceEnd(ws, payload);
+          break;
+
+        case 'STREAM_COMMAND':
+        case 'stream_command': {
+          const userQuery = payload.text || '';
+          if (!userQuery.trim()) return;
+          await saveMessage('user', userQuery, 'STREAM_INPUT');
+          await streamingServer.handleStreamCommand(ws, userQuery, { personality: userPersonality, voiceSpeed, voicePitch });
+          break;
+        }
 
         case 'COMMAND': {
           const userQuery = payload.text || '';
@@ -454,6 +470,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
+    streamingServer.destroySession(ws);
     console.log('[WS] Client disconnected');
   });
 });
