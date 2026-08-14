@@ -134,34 +134,49 @@ class SpeechService {
 
     this.synth.cancel();
 
+    // Ensure voices are loaded
+    let voices = this.synth.getVoices();
+    if (voices.length === 0) {
+      voices = await new Promise(resolve => {
+        const handler = () => {
+          this.synth.removeEventListener('voiceschanged', handler);
+          resolve(this.synth.getVoices());
+        };
+        this.synth.addEventListener('voiceschanged', handler);
+        setTimeout(() => resolve([]), 150);
+      });
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
-    const targetVoiceId = options.voiceId || (this.activeVoiceProfile ? this.activeVoiceProfile.id : 'voice_eleven_friday_pro');
-    
-    const voices = this.synth.getVoices();
+    const targetVoiceId = options.voiceId || (this.activeVoiceProfile ? this.activeVoiceProfile.id : 'voice_eleven_charlotte');
 
     // Voice Profile Characteristic Mapping (Ensures distinct pitch/accent per card)
     let selectedNativeVoice = null;
     let pitchMultiplier = 1.0;
     let speedMultiplier = 1.0;
 
-    if (targetVoiceId === 'voice_eleven_stark_warm') {
-      // Warm Secretary: British Accent, Slightly Higher Pitch
-      selectedNativeVoice = voices.find(v => v.lang.startsWith('en-GB') || v.name.includes('UK') || v.name.includes('Hazel') || v.name.includes('Sonia'));
+    if (targetVoiceId.includes('charlotte') || targetVoiceId.includes('emily') || targetVoiceId.includes('jenny')) {
+      // Warm / Conversational Female
+      selectedNativeVoice = voices.find(v => (v.name.includes('Jenny') || v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Female')) && v.lang.startsWith('en'));
+      pitchMultiplier = 1.08;
+      speedMultiplier = 1.0;
+    } else if (targetVoiceId.includes('matilda')) {
+      // Expressive Female
+      selectedNativeVoice = voices.find(v => (v.name.includes('Sonia') || v.name.includes('Hazel') || v.name.includes('Victoria')) && v.lang.startsWith('en'));
       pitchMultiplier = 1.15;
-      speedMultiplier = 0.95;
-    } else if (targetVoiceId === 'voice_azure_jenny') {
-      // Azure Jenny: Crisp US Female
-      selectedNativeVoice = voices.find(v => v.name.includes('Jenny') || v.name.includes('Zira') || v.name.includes('Samantha') || (v.lang.startsWith('en-US') && v.name.includes('Female')));
-      pitchMultiplier = 1.05;
       speedMultiplier = 1.05;
-    } else if (targetVoiceId === 'voice_google_wavenet') {
-      // Google WaveNet: Soft Casual Voice
-      selectedNativeVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Natural'));
+    } else if (targetVoiceId.includes('callum') || targetVoiceId.includes('harry')) {
+      // British / Scottish Male
+      selectedNativeVoice = voices.find(v => (v.name.includes('George') || v.name.includes('Oliver') || v.lang.startsWith('en-GB')));
       pitchMultiplier = 0.95;
+      speedMultiplier = 0.98;
+    } else if (targetVoiceId.includes('josh') || targetVoiceId.includes('patrick') || targetVoiceId.includes('adam')) {
+      // Deep / Professional Male
+      selectedNativeVoice = voices.find(v => (v.name.includes('David') || v.name.includes('Mark') || v.name.includes('Guy') || v.name.includes('Male')) && v.lang.startsWith('en'));
+      pitchMultiplier = 0.88;
       speedMultiplier = 1.0;
     } else {
-      // F.R.I.D.A.Y. Professional
-      selectedNativeVoice = voices.find(v => v.lang.startsWith('en-US') && (v.name.includes('Neural') || v.name.includes('Zira') || v.name.includes('David')));
+      selectedNativeVoice = voices.find(v => v.lang.startsWith('en-US'));
       pitchMultiplier = 1.0;
       speedMultiplier = 1.0;
     }
@@ -171,7 +186,7 @@ class SpeechService {
     }
 
     const finalRate = (options.speed || this.voiceSpeed) * speedMultiplier;
-    const finalPitch = (options.pitch || this.voicePitch) * pitchMultiplier;
+    const finalPitch = 1.0 + ((options.pitch || 0.0) * 0.2) + (pitchMultiplier - 1.0);
 
     utterance.rate = Math.max(0.5, Math.min(2.0, finalRate));
     utterance.pitch = Math.max(0.5, Math.min(1.5, finalPitch));
@@ -187,13 +202,21 @@ class SpeechService {
     };
 
     utterance.onerror = (err) => {
-      console.warn('[TTS] Synthesis error:', err);
       this.isSpeaking = false;
       this.notifyStateChange();
-      audioDiagnostics.playDiagnosticChime();
+      // Ignore normal interruptions when user clicks new voice or aborts
+      if (err.error !== 'interrupted' && err.error !== 'canceled') {
+        console.warn('[TTS] Synthesis error:', err);
+        audioDiagnostics.playDiagnosticChime();
+      }
     };
 
-    this.synth.speak(utterance);
+    // Small timeout avoids Chrome cancel race condition
+    setTimeout(() => {
+      if (this.synth) {
+        this.synth.speak(utterance);
+      }
+    }, 20);
   }
 
   stopSpeaking(reason = 'Barge-in') {
