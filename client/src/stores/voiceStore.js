@@ -92,7 +92,7 @@ export const useVoiceStore = () => {
       }
     },
 
-    // Raw Audio Binary Blob Stream Preview Player
+    // Raw Audio Binary Stream Preview Player
     playPreview: async (voiceId, customText) => {
       await audioDiagnostics.unlockAudioContext();
       actions.stopPreview();
@@ -107,11 +107,10 @@ export const useVoiceStore = () => {
       } catch (err) {
         console.warn('[VoiceStore] Playback error:', err);
       } finally {
-        setTimeout(() => {
-          if (state.previewVoiceId === voiceId) {
-            actions.stopPreview();
-          }
-        }, 4200);
+        // Automatically reset state when playback finishes or errors
+        if (state.previewVoiceId === voiceId && !audioPlaybackService.isPlaying) {
+          actions.stopPreview();
+        }
       }
     },
 

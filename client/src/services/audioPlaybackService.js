@@ -1,4 +1,4 @@
-// services/audioPlaybackService.js — High-Fidelity Hybrid Audio Playback Engine
+// services/audioPlaybackService.js — High-Fidelity Data-URI Audio Playback Engine
 import { audioDiagnostics } from './audioDiagnostics.js';
 import { speechService } from './speechService.js';
 
@@ -6,8 +6,6 @@ class AudioPlaybackService {
   constructor() {
     this.audioContext = null;
     this.currentAudio = null;
-    this.currentSource = null;
-    this.currentBlobUrl = null;
     this.isPlaying = false;
     this.onStateChangeCallbacks = [];
   }
@@ -29,25 +27,23 @@ class AudioPlaybackService {
   }
 
   /**
-   * Play an audio URL (Blob URL or Base64 Data URI) using HTML5 Audio element with Web Audio fallback
+   * Convert an ArrayBuffer into a robust Base64 Data URI
+   */
+  arrayBufferToDataUri(arrayBuffer, mimeType = 'audio/mpeg') {
+    const bytes = new Uint8Array(arrayBuffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+    }
+    return `data:${mimeType};base64,${window.btoa(binary)}`;
+  }
+
+  /**
+   * Play an audio URL (Data URI or Stream URL) using HTML5 Audio element
    */
   async playAudioUrl(url, fallbackText = null, voiceId = null, settings = {}) {
-    // Stop any existing playing audio without revoking the incoming url
-    if (this.currentAudio) {
-      try {
-        this.currentAudio.pause();
-        this.currentAudio.currentTime = 0;
-      } catch (e) {}
-      this.currentAudio = null;
-    }
-    if (this.currentSource) {
-      try {
-        this.currentSource.stop();
-        this.currentSource.disconnect();
-      } catch (e) {}
-      this.currentSource = null;
-    }
-    speechService.stopSpeaking('New audio started');
+    this.stop();
     this.setPlaying(true);
 
     return new Promise((resolve) => {
@@ -61,12 +57,6 @@ class AudioPlaybackService {
         const cleanup = () => {
           this.setPlaying(false);
           this.currentAudio = null;
-          if (this.currentBlobUrl && this.currentBlobUrl === url) {
-            try {
-              URL.revokeObjectURL(this.currentBlobUrl);
-            } catch (e) {}
-            this.currentBlobUrl = null;
-          }
         };
 
         audio.oncanplaythrough = () => {
@@ -74,7 +64,7 @@ class AudioPlaybackService {
             console.log('[AudioPlaybackService] SUCCESS: Native HTML5 Audio playback started.');
             resolve(true);
           }).catch(async (playErr) => {
-            console.warn('[AudioPlaybackService] audio.play() promise rejected:', playErr.message);
+            console.warn('[AudioPlaybackService] audio.play() rejected:', playErr.message);
             cleanup();
             if (fallbackText) {
               await speechService.speak(fallbackText, { voiceId, ...settings });
@@ -84,12 +74,12 @@ class AudioPlaybackService {
         };
 
         audio.onended = () => {
-          console.log('[AudioPlaybackService] Audio playback finished.');
+          console.log('[AudioPlaybackService] Audio playback completed.');
           cleanup();
         };
 
         audio.onerror = async (e) => {
-          console.warn('[AudioPlaybackService] HTML5 Audio element encountered error:', e);
+          console.warn('[AudioPlaybackService] HTML5 Audio element error:', e);
           cleanup();
           if (fallbackText) {
             await speechService.speak(fallbackText, { voiceId, ...settings });
@@ -97,10 +87,10 @@ class AudioPlaybackService {
           resolve(false);
         };
 
-        // Trigger load
+        // Load media
         audio.load();
       } catch (err) {
-        console.error('[AudioPlaybackService] Exception creating Audio element:', err);
+        console.error('[AudioPlaybackService] Exception starting Audio playback:', err);
         if (fallbackText) {
           speechService.speak(fallbackText, { voiceId, ...settings });
         }
@@ -111,7 +101,7 @@ class AudioPlaybackService {
   }
 
   /**
-   * Fetch raw MPEG audio blob from proxy, create blob URL, and play via high-compatibility player
+   * Fetch raw MPEG audio blob from proxy, convert to data URI, and play via HTML5 audio
    */
   async playRawAudio(text, voiceId, settings = {}) {
     await audioDiagnostics.unlockAudioContext();
@@ -137,17 +127,14 @@ class AudioPlaybackService {
       const contentType = response.headers.get('Content-Type') || '';
       console.log(`[AudioPlaybackService] Server Response: HTTP ${response.status} (Content-Type: '${contentType}')`);
 
-      // 1. Raw Binary Audio Blob
+      // 1. Raw Binary MPEG Audio Buffer
       if (response.ok && contentType.includes('audio/mpeg')) {
-        const blob = await response.blob();
-        console.log(`[AudioPlaybackService] Binary MPEG Blob received (${blob.size} bytes). Preparing HTML5 Audio playback...`);
+        const arrayBuffer = await response.arrayBuffer();
+        console.log(`[AudioPlaybackService] Binary MPEG received (${arrayBuffer.byteLength} bytes). Converting to Data URI...`);
 
-        if (blob.size > 100) {
-          if (this.currentBlobUrl) {
-            URL.revokeObjectURL(this.currentBlobUrl);
-          }
-          this.currentBlobUrl = URL.createObjectURL(blob);
-          return await this.playAudioUrl(this.currentBlobUrl, text, voiceId, settings);
+        if (arrayBuffer.byteLength > 100) {
+          const dataUri = this.arrayBufferToDataUri(arrayBuffer, 'audio/mpeg');
+          return await this.playAudioUrl(dataUri, text, voiceId, settings);
         }
       } 
       // 2. JSON Fallback with Base64 audioUrl
@@ -221,17 +208,6 @@ class AudioPlaybackService {
         this.currentAudio.currentTime = 0;
       } catch (e) {}
       this.currentAudio = null;
-    }
-    if (this.currentSource) {
-      try {
-        this.currentSource.stop();
-        this.currentSource.disconnect();
-      } catch (e) {}
-      this.currentSource = null;
-    }
-    if (this.currentBlobUrl) {
-      URL.revokeObjectURL(this.currentBlobUrl);
-      this.currentBlobUrl = null;
     }
     speechService.stopSpeaking('User stopped playback');
     this.setPlaying(false);
