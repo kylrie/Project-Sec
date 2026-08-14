@@ -59,15 +59,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// v1 Middleware Alias Router (/api/v1/* -> /api/*)
-app.use('/api/v1', (req, res, next) => {
-  req.url = req.url.replace('/v1', '');
-  next();
-});
-
-// Voice Studio Routes
-app.use('/api', voiceRoutes);
+// Voice Studio & TTS Routes
 app.use('/api/v1', voiceRoutes);
+app.use('/api', voiceRoutes);
 
 // Phase 5 Sync & Brain REST Endpoints
 app.post(['/api/sync', '/api/v1/sync/push'], async (req, res) => {
