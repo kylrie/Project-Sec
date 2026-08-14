@@ -17,6 +17,7 @@ import DndToggleWidget from './components/DndToggleWidget';
 import SecretaryBrainHUD from './components/SecretaryBrainHUD';
 import AuditLogModal from './components/AuditLogModal';
 import VoiceOnboardingModal from './components/VoiceOnboardingModal';
+import AdminDashboard from './components/AdminDashboard';
 import VoiceStudioPanel from './components/VoiceStudioPanel';
 import LatencyDebugPanel from './components/LatencyDebugPanel';
 import { streamingClient } from './services/streamingClient';
