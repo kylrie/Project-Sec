@@ -32,7 +32,22 @@ class AudioPlaybackService {
    * Play an audio URL (Blob URL or Base64 Data URI) using HTML5 Audio element with Web Audio fallback
    */
   async playAudioUrl(url, fallbackText = null, voiceId = null, settings = {}) {
-    this.stop();
+    // Stop any existing playing audio without revoking the incoming url
+    if (this.currentAudio) {
+      try {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      } catch (e) {}
+      this.currentAudio = null;
+    }
+    if (this.currentSource) {
+      try {
+        this.currentSource.stop();
+        this.currentSource.disconnect();
+      } catch (e) {}
+      this.currentSource = null;
+    }
+    speechService.stopSpeaking('New audio started');
     this.setPlaying(true);
 
     return new Promise((resolve) => {
@@ -43,35 +58,42 @@ class AudioPlaybackService {
         audio.volume = 1.0;
         this.currentAudio = audio;
 
+        const cleanup = () => {
+          this.setPlaying(false);
+          this.currentAudio = null;
+          if (this.currentBlobUrl && this.currentBlobUrl === url) {
+            try {
+              URL.revokeObjectURL(this.currentBlobUrl);
+            } catch (e) {}
+            this.currentBlobUrl = null;
+          }
+        };
+
         audio.oncanplaythrough = () => {
           audio.play().then(() => {
             console.log('[AudioPlaybackService] SUCCESS: Native HTML5 Audio playback started.');
             resolve(true);
           }).catch(async (playErr) => {
             console.warn('[AudioPlaybackService] audio.play() promise rejected:', playErr.message);
-            if (playErr.name === 'NotAllowedError') {
-              console.warn('[AudioPlaybackService] Browser autoplay policy blocked audio. User gesture needed.');
-            }
+            cleanup();
             if (fallbackText) {
               await speechService.speak(fallbackText, { voiceId, ...settings });
             }
-            this.setPlaying(false);
             resolve(false);
           });
         };
 
         audio.onended = () => {
           console.log('[AudioPlaybackService] Audio playback finished.');
-          this.setPlaying(false);
-          this.currentAudio = null;
+          cleanup();
         };
 
         audio.onerror = async (e) => {
           console.warn('[AudioPlaybackService] HTML5 Audio element encountered error:', e);
+          cleanup();
           if (fallbackText) {
             await speechService.speak(fallbackText, { voiceId, ...settings });
           }
-          this.setPlaying(false);
           resolve(false);
         };
 
