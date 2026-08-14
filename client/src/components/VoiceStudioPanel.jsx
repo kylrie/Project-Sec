@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Mic, Play, Pause, Check, Sliders, Sparkles, X, Volume2, Split, Plus, Search, Shield, Zap, Info, Activity, Radio, Cpu } from 'lucide-react';
 import { useVoiceStore } from '../stores/voiceStore';
 import { audioDiagnostics } from '../services/audioDiagnostics';
+import { audioPlaybackService } from '../services/audioPlaybackService';
 import { filterQualityVoices } from '../services/voiceCurator';
 import VoiceWaveform from './VoiceWaveform';
 import VoiceQualityTest from './VoiceQualityTest';
@@ -60,6 +61,7 @@ export default function VoiceStudioPanel({ isOpen, onClose }) {
 
   const handleTestSpeakers = async () => {
     setIsTestingSpeakers(true);
+    await audioPlaybackService.testAudioBeep();
     const diag = await audioDiagnostics.runFullAudioDiagnostic();
     setDiagnosticResult(diag);
     setIsTestingSpeakers(false);

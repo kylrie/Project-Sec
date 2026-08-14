@@ -12,6 +12,7 @@
     "test:comm": "node testCommEngine.js",
     "test:prod": "node testProductionSuite.js",
     "test:voice": "node testVoiceEngine.js",
+    "diagnostic": "node diagnostic.js",
     "test": "node test.js && node testWorkspace.js && node testMeetingEngine.js && node testCommEngine.js && node testProductionSuite.js && node testVoiceEngine.js"
   },
   "dependencies": {

@@ -309,28 +309,37 @@ export class EnhancedTTSService {
     const apiKey = process.env.ELEVENLABS_API_KEY;
 
     if (apiKey && apiKey !== 'mock_elevenlabs_api_key' && voice.provider === 'elevenlabs') {
-      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.provider_voice_id}?output_format=${OUTPUT_FORMAT}`, {
-        method: 'POST',
-        headers: {
-          'xi-api-key': apiKey,
-          'Content-Type': 'application/json',
-          'Accept': 'audio/mpeg'
-        },
-        body: JSON.stringify({
-          text,
-          model_id: MODEL_ID,
-          voice_settings: {
-            stability: mergedSettings.stability,
-            similarity_boost: mergedSettings.similarity_boost,
-            style: mergedSettings.style,
-            use_speaker_boost: mergedSettings.use_speaker_boost
-          }
-        })
-      });
+      try {
+        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.provider_voice_id}?output_format=${OUTPUT_FORMAT}`, {
+          method: 'POST',
+          headers: {
+            'xi-api-key': apiKey,
+            'Content-Type': 'application/json',
+            'Accept': 'audio/mpeg'
+          },
+          body: JSON.stringify({
+            text,
+            model_id: MODEL_ID,
+            voice_settings: {
+              stability: mergedSettings.stability,
+              similarity_boost: mergedSettings.similarity_boost,
+              style: mergedSettings.style,
+              use_speaker_boost: mergedSettings.use_speaker_boost
+            }
+          })
+        });
 
-      if (response.ok) {
-        const arrayBuffer = await response.arrayBuffer();
-        return Buffer.from(arrayBuffer);
+        if (response.ok) {
+          const arrayBuffer = await response.arrayBuffer();
+          const buffer = Buffer.from(arrayBuffer);
+          console.log(`[ElevenLabs TTS] Audio synthesized successfully for voice '${voice.name}' (${buffer.length} bytes)`);
+          return buffer;
+        } else {
+          const errText = await response.text();
+          console.warn(`[ElevenLabs TTS API Error] Status: ${response.status}, Detail: ${errText}`);
+        }
+      } catch (fetchErr) {
+        console.error(`[ElevenLabs TTS Fetch Exception]: ${fetchErr.message}`);
       }
     }
 
@@ -354,6 +363,17 @@ export class EnhancedTTSService {
       emotion: emotionSettings.emotion
     };
 
+    // Generate base64 audio fallback data URI
+    let audioUrl = null;
+    try {
+      const audioBuffer = await this.synthesizeRawAudio(text, voiceId, mergedSettings);
+      if (audioBuffer && audioBuffer.length > 0) {
+        audioUrl = `data:audio/mpeg;base64,${audioBuffer.toString('base64')}`;
+      }
+    } catch (e) {
+      console.warn('[EnhancedTTSService] Failed to create fallback base64 audio URL:', e.message);
+    }
+
     return {
       success: true,
       text,
@@ -364,6 +384,7 @@ export class EnhancedTTSService {
       gender: voice.gender,
       model: MODEL_ID,
       format: OUTPUT_FORMAT,
+      audioUrl: audioUrl,
       settings: mergedSettings
     };
   }

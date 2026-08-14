@@ -459,6 +459,15 @@ wss.on('connection', (ws) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`[FRIDAY] Backend Core & Unified Secretary Brain Core listening on http://localhost:${PORT}`);
-  console.log(`[FRIDAY] WebSocket active at ws://localhost:${PORT}`);
+  const hasElevenLabs = Boolean(process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_API_KEY !== 'mock_elevenlabs_api_key');
+  const maskedKey = hasElevenLabs 
+    ? `${process.env.ELEVENLABS_API_KEY.substring(0, 4)}...${process.env.ELEVENLABS_API_KEY.slice(-4)}`
+    : 'NOT SET (Mock Mode)';
+
+  console.log(`=======================================================`);
+  console.log(`[FRIDAY] Backend Core & Unified Secretary Brain Online`);
+  console.log(`[FRIDAY] HTTP Server: http://localhost:${PORT}`);
+  console.log(`[FRIDAY] WebSocket:   ws://localhost:${PORT}`);
+  console.log(`[FRIDAY] ElevenLabs API Key: ${hasElevenLabs ? 'LOADED (' + maskedKey + ')' : 'MISSING / MOCK'}`);
+  console.log(`=======================================================`);
 });

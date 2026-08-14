@@ -36,6 +36,7 @@ class AudioPlaybackService {
 
     try {
       this.setPlaying(true);
+      console.log(`[AudioPlaybackService] Requesting TTS synthesis for voice '${voiceId}'...`);
 
       const response = await fetch('/api/v1/tts/synthesize', {
         method: 'POST',
@@ -50,13 +51,15 @@ class AudioPlaybackService {
         })
       });
 
-      const contentType = response.headers.get('Content-Type');
+      const contentType = response.headers.get('Content-Type') || '';
+      console.log(`[AudioPlaybackService] Response status: ${response.status}, Content-Type: '${contentType}'`);
 
-      // If backend returned raw binary MPEG audio
-      if (response.ok && contentType && contentType.includes('audio/mpeg')) {
+      // 1. If backend returned raw binary MPEG audio
+      if (response.ok && contentType.includes('audio/mpeg')) {
         const blob = await response.blob();
+        console.log(`[AudioPlaybackService] Binary MPEG Blob received (${blob.size} bytes). Initializing Web Audio decoding...`);
+
         if (blob.size > 100) {
-          // Release any previous blob URL
           if (this.currentBlobUrl) {
             URL.revokeObjectURL(this.currentBlobUrl);
           }
@@ -78,20 +81,24 @@ class AudioPlaybackService {
 
             source.start(0);
             this.currentSource = source;
-            console.log('[AudioPlaybackService] Playing Raw 44.1kHz Binary Stream Duration:', decodedBuffer.duration.toFixed(2) + 's');
+            console.log(`[AudioPlaybackService] SUCCESS: Playing 44.1kHz ElevenLabs Stream (${decodedBuffer.duration.toFixed(2)}s)`);
             return true;
           }
         }
-      } else if (response.ok && contentType && contentType.includes('application/json')) {
+      } 
+      // 2. If backend returned JSON (with base64 audioUrl)
+      else if (response.ok && contentType.includes('application/json')) {
         const json = await response.json();
+        console.log(`[AudioPlaybackService] JSON response received. json.audioUrl present: ${Boolean(json?.audioUrl)}`);
+
         if (json.audioUrl) {
-          console.log('[AudioPlaybackService] Received JSON with base64 audio, decoding...');
+          console.log('[AudioPlaybackService] Decoding base64 audio data URI...');
           const base64Data = json.audioUrl.replace(/^data:audio\/\w+;base64,/, '');
           const binaryString = window.atob(base64Data);
           const len = binaryString.length;
           const bytes = new Uint8Array(len);
           for (let i = 0; i < len; i++) {
-              bytes[i] = binaryString.charCodeAt(i);
+            bytes[i] = binaryString.charCodeAt(i);
           }
           const arrayBuffer = bytes.buffer;
 
@@ -109,14 +116,14 @@ class AudioPlaybackService {
 
             source.start(0);
             this.currentSource = source;
-            console.log('[AudioPlaybackService] Playing base64 Audio Duration:', decodedBuffer.duration.toFixed(2) + 's');
+            console.log(`[AudioPlaybackService] SUCCESS: Playing decoded base64 stream (${decodedBuffer.duration.toFixed(2)}s)`);
             return true;
           }
         }
       }
 
-      // Fallback: Web Speech API with mapped human voice characteristics
-      console.log('[AudioPlaybackService] Using HD SpeechSynthesis fallback for:', voiceId);
+      // 3. Fallback to Web Speech API with mapped characteristics
+      console.warn(`[AudioPlaybackService] Fallback to SpeechSynthesis for voice '${voiceId}'`);
       await speechService.speak(text, { voiceId, ...settings });
       this.setPlaying(false);
       return true;
@@ -124,6 +131,38 @@ class AudioPlaybackService {
       console.warn('[AudioPlaybackService] Audio stream error, fallback to SpeechSynthesis:', err);
       await speechService.speak(text, { voiceId, ...settings });
       this.setPlaying(false);
+      return false;
+    }
+  }
+
+  /**
+   * Diagnostic Web Audio API Oscillator Beep Test
+   */
+  async testAudioBeep() {
+    try {
+      const ctx = this.getAudioContext();
+      if (!ctx) return false;
+      if (ctx.state === 'suspended') await ctx.resume();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5
+
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+      console.log('[AudioPlaybackService] Test diagnostic chime played via Web Audio API Oscillator.');
+      return true;
+    } catch (e) {
+      console.error('[AudioPlaybackService] Test audio beep failed:', e);
       return false;
     }
   }

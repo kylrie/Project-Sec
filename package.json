@@ -9,6 +9,7 @@
     "dev:desktop": "npm --prefix desktop start",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:client\"",
     "app": "concurrently \"npm run dev:backend\" \"npm run dev:client\" \"npm --prefix desktop start\"",
+    "diagnostic": "npm --prefix backend run diagnostic",
     "test": "npm --prefix backend test"
   },
   "dependencies": {
