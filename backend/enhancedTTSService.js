@@ -4,10 +4,29 @@ import { filterQualityVoices } from './voiceCurator.js';
 
 export const sampleVoiceCatalog = [
   {
-    id: 'voice_eleven_friday_pro',
+    id: 'voice_eleven_charlotte',
     provider: 'elevenlabs',
-    provider_voice_id: '21m00Tcm4TlvDq8ikWAM',
-    name: 'F.R.I.D.A.Y. Professional',
+    provider_voice_id: 'XB0fDUnXU5powFXDhCwa',
+    name: 'Charlotte (Warm & Natural)',
+    gender: 'female',
+    language: 'en-US',
+    accent: 'American',
+    previewUrl: null,
+    category: 'warm',
+    isCloned: false,
+    isHD: true,
+    emotions: ['cheerful', 'warm', 'empathetic'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: true
+  },
+  {
+    id: 'voice_eleven_matilda',
+    provider: 'elevenlabs',
+    provider_voice_id: 'XrExE9yKIg1WjnnlVkGX',
+    name: 'Matilda (Expressive & Clear)',
     gender: 'female',
     language: 'en-US',
     accent: 'American',
@@ -15,29 +34,124 @@ export const sampleVoiceCatalog = [
     category: 'professional',
     isCloned: false,
     isHD: true,
-    emotions: ['cheerful', 'neutral', 'assertive'],
+    emotions: ['assertive', 'neutral', 'cheerful'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: false
+  },
+  {
+    id: 'voice_eleven_josh',
+    provider: 'elevenlabs',
+    provider_voice_id: 'TxGEqnHWrfWFTfGW9XjX',
+    name: 'Josh (Professional & Deep)',
+    gender: 'male',
+    language: 'en-US',
+    accent: 'American',
+    previewUrl: null,
+    category: 'professional',
+    isCloned: false,
+    isHD: true,
+    emotions: ['neutral', 'assertive'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: false
+  },
+  {
+    id: 'voice_eleven_emily',
+    provider: 'elevenlabs',
+    provider_voice_id: 'LcfcDJNUP1GQjkzn1xUU',
+    name: 'Emily (Conversational & Warm)',
+    gender: 'female',
+    language: 'en-US',
+    accent: 'American',
+    previewUrl: null,
+    category: 'casual',
+    isCloned: false,
+    isHD: true,
+    emotions: ['cheerful', 'warm'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: false
+  },
+  {
+    id: 'voice_eleven_callum',
+    provider: 'elevenlabs',
+    provider_voice_id: 'N2lVS1w4EtoT3dr4eOWO',
+    name: 'Callum (Scottish Natural)',
+    gender: 'male',
+    language: 'en-GB',
+    accent: 'Scottish',
+    previewUrl: null,
+    category: 'casual',
+    isCloned: false,
+    isHD: true,
+    emotions: ['warm', 'cheerful'],
     supportsSpeed: true,
     supportsPitch: true,
     latency: 'medium',
     costPer1KChars: 0.015,
-    isDefault: true
+    isDefault: false
   },
   {
-    id: 'voice_eleven_stark_warm',
+    id: 'voice_eleven_patrick',
     provider: 'elevenlabs',
-    provider_voice_id: 'AZnzlk1XvdvUeBnXmlld',
-    name: 'F.R.I.D.A.Y. Warm Secretary',
-    gender: 'female',
+    provider_voice_id: 'ODq5zmih8GrVes37Dizd',
+    name: 'Patrick (News Anchor Executive)',
+    gender: 'male',
+    language: 'en-US',
+    accent: 'American',
+    previewUrl: null,
+    category: 'authoritative',
+    isCloned: false,
+    isHD: true,
+    emotions: ['assertive', 'neutral'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: false
+  },
+  {
+    id: 'voice_eleven_harry',
+    provider: 'elevenlabs',
+    provider_voice_id: 'SOYHLrjzK2X1ezoPC6w8',
+    name: 'Harry (British Natural Butler)',
+    gender: 'male',
     language: 'en-GB',
     accent: 'British',
+    previewUrl: null,
+    category: 'professional',
+    isCloned: false,
+    isHD: true,
+    emotions: ['polite', 'neutral'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: false
+  },
+  {
+    id: 'voice_eleven_adam_new',
+    provider: 'elevenlabs',
+    provider_voice_id: 'VR6AewLTigWG4xSOukaG',
+    name: 'Adam NEW (Deep & Warm)',
+    gender: 'male',
+    language: 'en-US',
+    accent: 'American',
     previewUrl: null,
     category: 'warm',
     isCloned: false,
     isHD: true,
-    emotions: ['cheerful', 'empathetic'],
+    emotions: ['warm', 'authoritative'],
     supportsSpeed: true,
     supportsPitch: true,
-    latency: 'medium',
+    latency: 'low',
     costPer1KChars: 0.015,
     isDefault: false
   },
@@ -155,7 +269,6 @@ export class EnhancedTTSService {
       }));
     }
 
-    // Filter for quality voices
     voices = filterQualityVoices(voices);
 
     if (providerFilter) {
@@ -179,11 +292,55 @@ export class EnhancedTTSService {
     return { success: true, activeVoiceId: voiceId };
   }
 
-  // High-Fidelity ElevenLabs & Multi-Provider Synthesizer
+  // Synthesize and return raw binary audio buffer
+  async synthesizeRawAudio(text, voiceId = null, customSettings = {}) {
+    const catalog = await this.getVoiceCatalog();
+    const targetVoiceId = voiceId || (await this.getActiveVoice()).id;
+    const voice = catalog.find(v => v.id === targetVoiceId || v.provider_voice_id === targetVoiceId) || catalog[0];
+    const naturalDefault = getNaturalSettings('natural_conversational');
+
+    const mergedSettings = {
+      stability: customSettings.stability !== undefined ? customSettings.stability : naturalDefault.stability,
+      similarity_boost: customSettings.similarity_boost !== undefined ? customSettings.similarity_boost : (customSettings.similarityBoost || naturalDefault.similarity_boost),
+      style: customSettings.style !== undefined ? customSettings.style : naturalDefault.style,
+      use_speaker_boost: customSettings.use_speaker_boost !== undefined ? customSettings.use_speaker_boost : true
+    };
+
+    const apiKey = process.env.ELEVENLABS_API_KEY;
+
+    if (apiKey && apiKey !== 'mock_elevenlabs_api_key' && voice.provider === 'elevenlabs') {
+      const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.provider_voice_id}?output_format=${OUTPUT_FORMAT}`, {
+        method: 'POST',
+        headers: {
+          'xi-api-key': apiKey,
+          'Content-Type': 'application/json',
+          'Accept': 'audio/mpeg'
+        },
+        body: JSON.stringify({
+          text,
+          model_id: MODEL_ID,
+          voice_settings: {
+            stability: mergedSettings.stability,
+            similarity_boost: mergedSettings.similarity_boost,
+            style: mergedSettings.style,
+            use_speaker_boost: mergedSettings.use_speaker_boost
+          }
+        })
+      });
+
+      if (response.ok) {
+        const arrayBuffer = await response.arrayBuffer();
+        return Buffer.from(arrayBuffer);
+      }
+    }
+
+    return null;
+  }
+
   async synthesize(text, context = {}, voiceId = null, customSettings = {}) {
     const catalog = await this.getVoiceCatalog();
     const targetVoiceId = voiceId || (await this.getActiveVoice()).id;
-    const voice = catalog.find(v => v.id === targetVoiceId) || catalog[0];
+    const voice = catalog.find(v => v.id === targetVoiceId || v.provider_voice_id === targetVoiceId) || catalog[0];
     const naturalDefault = getNaturalSettings('natural_conversational');
     const emotionSettings = EmotionEngine.getSettings(context.intent || 'greeting', context.urgency || 'normal');
 
@@ -197,49 +354,6 @@ export class EnhancedTTSService {
       emotion: emotionSettings.emotion
     };
 
-    const apiKey = process.env.ELEVENLABS_API_KEY;
-
-    if (apiKey && apiKey !== 'mock_elevenlabs_api_key' && voice.provider === 'elevenlabs') {
-      try {
-        const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voice.provider_voice_id}?output_format=${OUTPUT_FORMAT}`, {
-          method: 'POST',
-          headers: {
-            'xi-api-key': apiKey,
-            'Content-Type': 'application/json',
-            'Accept': 'audio/mpeg'
-          },
-          body: JSON.stringify({
-            text,
-            model_id: MODEL_ID,
-            voice_settings: {
-              stability: mergedSettings.stability,
-              similarity_boost: mergedSettings.similarity_boost,
-              style: mergedSettings.style,
-              use_speaker_boost: mergedSettings.use_speaker_boost
-            }
-          })
-        });
-
-        if (response.ok) {
-          const arrayBuffer = await response.arrayBuffer();
-          const base64Audio = Buffer.from(arrayBuffer).toString('base64');
-          return {
-            success: true,
-            text,
-            voiceId: voice.id,
-            voiceName: voice.name,
-            provider: voice.provider,
-            model: MODEL_ID,
-            format: OUTPUT_FORMAT,
-            audioUrl: `data:audio/mpeg;base64,${base64Audio}`,
-            settings: mergedSettings
-          };
-        }
-      } catch (err) {
-        console.warn('[TTSService] ElevenLabs API error:', err.message);
-      }
-    }
-
     return {
       success: true,
       text,
@@ -250,7 +364,6 @@ export class EnhancedTTSService {
       gender: voice.gender,
       model: MODEL_ID,
       format: OUTPUT_FORMAT,
-      audioUrl: null,
       settings: mergedSettings
     };
   }

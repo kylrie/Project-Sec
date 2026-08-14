@@ -24,6 +24,7 @@ import { socketService } from './services/socketService';
 import { audioService } from './services/audioService';
 import { speechService } from './services/speechService';
 import { wakeWordService } from './services/wakeWordService';
+import { audioPlaybackService } from './services/audioPlaybackService';
 import { useVoiceStore } from './stores/voiceStore';
 
 export default function App() {
@@ -120,11 +121,16 @@ export default function App() {
         setMeetingSummary(data.actionPayload);
       }
 
-      // Synthesize Speech with Barge-in readiness
-      speechService.speak(data.text, { speed, pitch, personality });
+      // Synthesize Speech with Raw Binary Audio Stream / Web Audio API
+      if (data.audioStreamUrl) {
+        audioPlaybackService.playStreamUrl(data.audioStreamUrl, data.text, data.activeVoice?.id, { speed, pitch, personality });
+      } else {
+        audioPlaybackService.playRawAudio(data.text, data.activeVoice?.id, { speed, pitch, personality });
+      }
     });
 
     socketService.on('TTS_ABORTED', () => {
+      audioPlaybackService.stop();
       setStatus('idle');
       setIsSpeaking(false);
     });

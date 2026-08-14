@@ -17,25 +17,38 @@ router.get('/voices', async (req, res) => {
   }
 });
 
-// POST /api/v1/tts/synthesize (High-Quality TTS Proxy Endpoint)
+// POST /api/v1/tts/synthesize (Returns Raw Binary Audio Bytes)
 router.post(['/tts/synthesize', '/tts'], async (req, res) => {
   try {
-    const { text, voiceId, settings, context } = req.body;
-    const result = await enhancedTTSService.synthesize(text, context || {}, voiceId, settings || {});
+    const { text, voiceId, settings } = req.body;
+    const audioBuffer = await enhancedTTSService.synthesizeRawAudio(text, voiceId, settings || {});
+
     res.setHeader('X-Voice-Model', MODEL_ID);
     res.setHeader('X-Audio-Format', OUTPUT_FORMAT);
-    res.json(result);
+
+    if (audioBuffer) {
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Length', audioBuffer.length);
+      return res.send(audioBuffer);
+    }
+
+    // Fallback info if API key is not configured
+    const meta = await enhancedTTSService.synthesize(text, {}, voiceId, settings || {});
+    res.json(meta);
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
 
-// POST /api/v1/tts/stream (High-Quality Chunked Audio Streaming Proxy Endpoint)
-router.post(['/tts/stream'], async (req, res) => {
+// POST & GET /api/v1/tts/stream (Direct Audio Stream)
+router.all(['/tts/stream'], async (req, res) => {
   try {
-    const { text, voiceId, settings } = req.body;
+    const text = req.body?.text || req.query?.text || 'Hello, I am F.R.I.D.A.Y.';
+    const voiceId = req.body?.voiceId || req.query?.voiceId;
+    const settings = req.body?.settings || {};
+
     const catalog = await enhancedTTSService.getVoiceCatalog();
-    const voice = catalog.find(v => v.id === voiceId) || catalog[0];
+    const voice = catalog.find(v => v.id === voiceId || v.provider_voice_id === voiceId) || catalog[0];
     const apiKey = process.env.ELEVENLABS_API_KEY;
 
     res.setHeader('Content-Type', 'audio/mpeg');
@@ -71,14 +84,13 @@ router.post(['/tts/stream'], async (req, res) => {
       }
     }
 
-    // Fallback streaming json payload
-    res.json({
-      success: true,
-      text,
-      model: MODEL_ID,
-      format: OUTPUT_FORMAT,
-      message: 'Streaming completed'
-    });
+    // Direct buffer response fallback
+    const audioBuffer = await enhancedTTSService.synthesizeRawAudio(text, voiceId, settings);
+    if (audioBuffer) {
+      return res.end(audioBuffer);
+    }
+
+    res.end();
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -145,7 +157,7 @@ router.post('/voices/presets', async (req, res) => {
     const preset = {
       id: 'preset_' + Date.now(),
       name: req.body.name || 'Custom Preset',
-      voiceId: req.body.voiceId || 'voice_eleven_friday_pro',
+      voiceId: req.body.voiceId || 'voice_eleven_charlotte',
       provider: req.body.provider || 'elevenlabs',
       speed: req.body.speed || 1.0,
       pitch: req.body.pitch || 0.0,

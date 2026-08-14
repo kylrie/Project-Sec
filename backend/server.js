@@ -410,7 +410,8 @@ wss.on('connection', (ws) => {
           const result = await processIntent(userQuery, userPersonality);
           const latencyMs = Date.now() - startTime;
 
-          await saveMessage('assistant', result.response, result.intent, latencyMs);
+          const activeVoice = await enhancedTTSService.getActiveVoice();
+          const audioStreamUrl = `/api/v1/tts/stream?text=${encodeURIComponent(result.response)}&voiceId=${activeVoice.id}`;
 
           const ttsPayload = buildTTSPayload(result.response, {
             personality: userPersonality,
@@ -427,6 +428,8 @@ wss.on('connection', (ws) => {
             actionPayload: result.actionPayload,
             alerts: alerts,
             activeMeeting: meetingEngine.activeMeeting,
+            audioStreamUrl: audioStreamUrl,
+            activeVoice: activeVoice,
             tts: ttsPayload,
             latency_ms: latencyMs,
             timestamp: Date.now()

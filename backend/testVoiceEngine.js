@@ -33,9 +33,9 @@ async function runVoiceTests() {
 
     // 4. Voice Preview Generation & Active Voice Selection
     console.log('[4/6] Testing Voice Preview Audio & Active Voice Selection...');
-    const preview = await enhancedTTSService.generatePreviewAudio('voice_eleven_friday_pro', 'Testing F.R.I.D.A.Y. voice.');
+    const preview = await enhancedTTSService.generatePreviewAudio('voice_eleven_charlotte', 'Testing F.R.I.D.A.Y. voice.');
     assert.strictEqual(preview.success, true);
-    assert.strictEqual(preview.voiceId, 'voice_eleven_friday_pro');
+    assert.strictEqual(preview.voiceId, 'voice_eleven_charlotte');
 
     const selectRes = await enhancedTTSService.setActiveVoice('voice_azure_jenny');
     assert.strictEqual(selectRes.success, true);
@@ -48,12 +48,12 @@ async function runVoiceTests() {
     const preset = {
       id: 'preset_test_01',
       name: 'Morning Briefing Preset',
-      voiceId: 'voice_eleven_friday_pro',
+      voiceId: 'voice_eleven_charlotte',
       provider: 'elevenlabs',
       speed: 1.1,
       pitch: 0.05,
-      stability: 0.4,
-      style: 0.2,
+      stability: 0.30,
+      style: 0.55,
       useSpeakerBoost: true,
       emotion: 'cheerful',
       autoActivateOn: 'morning_briefing'
