@@ -2,18 +2,16 @@
 
 // High-quality known ElevenLabs voices
 export const HIGH_QUALITY_VOICE_IDS = [
-  'XB0fDUnXU5powFXDhCwa', // Charlotte — very natural, warm
-  'XrExE9yKIg1WjnnlVkGX', // Matilda — expressive, clear
-  'TxGEqnHWrfWFTfGW9XjX', // Josh — natural, professional
-  'VR6AewLTigWG4xSOukaG', // Adam (newer version) — deep, warm
-  'XB0fDUnXU5powFXDhCwa', // Charlotte
+  'EXAVITQu4vr4xnSDxMaL', // Sarah (Default)
   'XrExE9yKIg1WjnnlVkGX', // Matilda
-  'TxGEqnHWrfWFTfGW9XjX', // Josh
-  'LcfcDJNUP1GQjkzn1xUU', // Emily
+  'nPczCjzI2devNBz1zQrb', // Brian
+  'cgSgspJ2msm6clMCkdW9', // Jessica
+  'JBFqnCBsd6RMkjVDRZzb', // George
+  'Xb7hH8MSUJpSbSDYk0k2', // Alice
   'N2lVS1w4EtoT3dr4eOWO', // Callum
-  'ODq5zmih8GrVes37Dizd', // Patrick
-  'SOYHLrjzK2X1ezoPC6w8', // Harry
-  'VR6AewLTigWG4xSOukaG', // Adam NEW
+  'SOYHLrjzK2X1ezoPC6cr', // Harry
+  'pFZP5JQG7iQjIQuC4Bku', // Lily
+  'CwhRBWXzGAHq8TQ4Fs17', // Roger
   'en-US-JennyNeural',
   'AVSpeechSynthesisVoice_en_US'
 ];

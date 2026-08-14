@@ -33,9 +33,9 @@ async function runVoiceTests() {
 
     // 4. Voice Preview Generation & Active Voice Selection
     console.log('[4/6] Testing Voice Preview Audio & Active Voice Selection...');
-    const preview = await enhancedTTSService.generatePreviewAudio('voice_eleven_charlotte', 'Testing F.R.I.D.A.Y. voice.');
+    const preview = await enhancedTTSService.generatePreviewAudio('voice_eleven_sarah', 'Testing F.R.I.D.A.Y. voice.');
     assert.strictEqual(preview.success, true);
-    assert.strictEqual(preview.voiceId, 'voice_eleven_charlotte');
+    assert.strictEqual(preview.voiceId, 'voice_eleven_sarah');
 
     const selectRes = await enhancedTTSService.setActiveVoice('voice_azure_jenny');
     assert.strictEqual(selectRes.success, true);

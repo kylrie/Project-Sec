@@ -4,10 +4,10 @@ import { filterQualityVoices } from './voiceCurator.js';
 
 export const sampleVoiceCatalog = [
   {
-    id: 'voice_eleven_charlotte',
+    id: 'voice_eleven_sarah',
     provider: 'elevenlabs',
-    provider_voice_id: 'XB0fDUnXU5powFXDhCwa',
-    name: 'Charlotte (Warm & Natural)',
+    provider_voice_id: 'EXAVITQu4vr4xnSDxMaL',
+    name: 'Sarah (Mature, Reassuring & Confident)',
     gender: 'female',
     language: 'en-US',
     accent: 'American',
@@ -42,10 +42,10 @@ export const sampleVoiceCatalog = [
     isDefault: false
   },
   {
-    id: 'voice_eleven_josh',
+    id: 'voice_eleven_brian',
     provider: 'elevenlabs',
-    provider_voice_id: 'TxGEqnHWrfWFTfGW9XjX',
-    name: 'Josh (Professional & Deep)',
+    provider_voice_id: 'nPczCjzI2devNBz1zQrb',
+    name: 'Brian (Deep, Resonant & Comforting)',
     gender: 'male',
     language: 'en-US',
     accent: 'American',
@@ -61,10 +61,10 @@ export const sampleVoiceCatalog = [
     isDefault: false
   },
   {
-    id: 'voice_eleven_emily',
+    id: 'voice_eleven_jessica',
     provider: 'elevenlabs',
-    provider_voice_id: 'LcfcDJNUP1GQjkzn1xUU',
-    name: 'Emily (Conversational & Warm)',
+    provider_voice_id: 'cgSgspJ2msm6clMCkdW9',
+    name: 'Jessica (Playful, Bright & Warm)',
     gender: 'female',
     language: 'en-US',
     accent: 'American',
@@ -80,10 +80,48 @@ export const sampleVoiceCatalog = [
     isDefault: false
   },
   {
+    id: 'voice_eleven_george',
+    provider: 'elevenlabs',
+    provider_voice_id: 'JBFqnCBsd6RMkjVDRZzb',
+    name: 'George (Warm & Captivating Storyteller)',
+    gender: 'male',
+    language: 'en-GB',
+    accent: 'British',
+    previewUrl: null,
+    category: 'warm',
+    isCloned: false,
+    isHD: true,
+    emotions: ['warm', 'cheerful'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: false
+  },
+  {
+    id: 'voice_eleven_alice',
+    provider: 'elevenlabs',
+    provider_voice_id: 'Xb7hH8MSUJpSbSDYk0k2',
+    name: 'Alice (Clear & Engaging Educator)',
+    gender: 'female',
+    language: 'en-US',
+    accent: 'American',
+    previewUrl: null,
+    category: 'professional',
+    isCloned: false,
+    isHD: true,
+    emotions: ['assertive', 'neutral'],
+    supportsSpeed: true,
+    supportsPitch: true,
+    latency: 'low',
+    costPer1KChars: 0.015,
+    isDefault: false
+  },
+  {
     id: 'voice_eleven_callum',
     provider: 'elevenlabs',
     provider_voice_id: 'N2lVS1w4EtoT3dr4eOWO',
-    name: 'Callum (Scottish Natural)',
+    name: 'Callum (Husky Scottish Male)',
     gender: 'male',
     language: 'en-GB',
     accent: 'Scottish',
@@ -99,28 +137,9 @@ export const sampleVoiceCatalog = [
     isDefault: false
   },
   {
-    id: 'voice_eleven_patrick',
-    provider: 'elevenlabs',
-    provider_voice_id: 'ODq5zmih8GrVes37Dizd',
-    name: 'Patrick (News Anchor Executive)',
-    gender: 'male',
-    language: 'en-US',
-    accent: 'American',
-    previewUrl: null,
-    category: 'authoritative',
-    isCloned: false,
-    isHD: true,
-    emotions: ['assertive', 'neutral'],
-    supportsSpeed: true,
-    supportsPitch: true,
-    latency: 'low',
-    costPer1KChars: 0.015,
-    isDefault: false
-  },
-  {
     id: 'voice_eleven_harry',
     provider: 'elevenlabs',
-    provider_voice_id: 'SOYHLrjzK2X1ezoPC6w8',
+    provider_voice_id: 'SOYHLrjzK2X1ezoPC6cr',
     name: 'Harry (British Natural Butler)',
     gender: 'male',
     language: 'en-GB',
@@ -137,18 +156,18 @@ export const sampleVoiceCatalog = [
     isDefault: false
   },
   {
-    id: 'voice_eleven_adam_new',
+    id: 'voice_eleven_lily',
     provider: 'elevenlabs',
-    provider_voice_id: 'VR6AewLTigWG4xSOukaG',
-    name: 'Adam NEW (Deep & Warm)',
-    gender: 'male',
+    provider_voice_id: 'pFZP5JQG7iQjIQuC4Bku',
+    name: 'Lily (Velvety Actress)',
+    gender: 'female',
     language: 'en-US',
     accent: 'American',
     previewUrl: null,
     category: 'warm',
     isCloned: false,
     isHD: true,
-    emotions: ['warm', 'authoritative'],
+    emotions: ['warm', 'cheerful'],
     supportsSpeed: true,
     supportsPitch: true,
     latency: 'low',
@@ -175,25 +194,6 @@ export const sampleVoiceCatalog = [
     isDefault: false
   },
   {
-    id: 'voice_google_wavenet',
-    provider: 'google',
-    provider_voice_id: 'en-US-Wavenet-F',
-    name: 'Google WaveNet Female',
-    gender: 'female',
-    language: 'en-US',
-    accent: 'American',
-    previewUrl: null,
-    category: 'casual',
-    isCloned: false,
-    isHD: false,
-    emotions: ['neutral'],
-    supportsSpeed: true,
-    supportsPitch: true,
-    latency: 'low',
-    costPer1KChars: 0.002,
-    isDefault: false
-  },
-  {
     id: 'voice_device_native',
     provider: 'device',
     provider_voice_id: 'AVSpeechSynthesisVoice_en_US',
@@ -215,7 +215,7 @@ export const sampleVoiceCatalog = [
 ];
 
 export const MODEL_ID = 'eleven_multilingual_v2'; // Most natural, emotional, human-like
-export const OUTPUT_FORMAT = 'mp3_44100_192'; // 44.1kHz stereo, 192kbps CD quality
+export const OUTPUT_FORMAT = 'mp3_44100_128'; // 44.1kHz stereo HD audio (universal tier compatible)
 
 export class EmotionEngine {
   static getEmotionMap() {
