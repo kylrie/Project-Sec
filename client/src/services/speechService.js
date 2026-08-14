@@ -148,35 +148,38 @@ class SpeechService {
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
-    const targetVoiceId = options.voiceId || (this.activeVoiceProfile ? this.activeVoiceProfile.id : 'voice_eleven_charlotte');
+    this.currentUtterance = utterance; // Prevent Chromium V8 GC bug
+    utterance.volume = 1.0;
+
+    const targetVoiceId = (options.voiceId || (this.activeVoiceProfile ? this.activeVoiceProfile.id : 'voice_eleven_sarah')).toLowerCase();
 
     // Voice Profile Characteristic Mapping (Ensures distinct pitch/accent per card)
     let selectedNativeVoice = null;
     let pitchMultiplier = 1.0;
     let speedMultiplier = 1.0;
 
-    if (targetVoiceId.includes('charlotte') || targetVoiceId.includes('emily') || targetVoiceId.includes('jenny')) {
+    if (targetVoiceId.includes('sarah') || targetVoiceId.includes('charlotte') || targetVoiceId.includes('emily') || targetVoiceId.includes('jenny')) {
       // Warm / Conversational Female
       selectedNativeVoice = voices.find(v => (v.name.includes('Jenny') || v.name.includes('Zira') || v.name.includes('Samantha') || v.name.includes('Female')) && v.lang.startsWith('en'));
       pitchMultiplier = 1.08;
       speedMultiplier = 1.0;
-    } else if (targetVoiceId.includes('matilda')) {
+    } else if (targetVoiceId.includes('matilda') || targetVoiceId.includes('alice') || targetVoiceId.includes('jessica') || targetVoiceId.includes('lily')) {
       // Expressive Female
-      selectedNativeVoice = voices.find(v => (v.name.includes('Sonia') || v.name.includes('Hazel') || v.name.includes('Victoria')) && v.lang.startsWith('en'));
+      selectedNativeVoice = voices.find(v => (v.name.includes('Sonia') || v.name.includes('Hazel') || v.name.includes('Victoria') || v.name.includes('Natural')) && v.lang.startsWith('en'));
       pitchMultiplier = 1.15;
       speedMultiplier = 1.05;
-    } else if (targetVoiceId.includes('callum') || targetVoiceId.includes('harry')) {
+    } else if (targetVoiceId.includes('callum') || targetVoiceId.includes('harry') || targetVoiceId.includes('george')) {
       // British / Scottish Male
       selectedNativeVoice = voices.find(v => (v.name.includes('George') || v.name.includes('Oliver') || v.lang.startsWith('en-GB')));
       pitchMultiplier = 0.95;
       speedMultiplier = 0.98;
-    } else if (targetVoiceId.includes('josh') || targetVoiceId.includes('patrick') || targetVoiceId.includes('adam')) {
+    } else if (targetVoiceId.includes('brian') || targetVoiceId.includes('josh') || targetVoiceId.includes('patrick') || targetVoiceId.includes('adam')) {
       // Deep / Professional Male
       selectedNativeVoice = voices.find(v => (v.name.includes('David') || v.name.includes('Mark') || v.name.includes('Guy') || v.name.includes('Male')) && v.lang.startsWith('en'));
       pitchMultiplier = 0.88;
       speedMultiplier = 1.0;
     } else {
-      selectedNativeVoice = voices.find(v => v.lang.startsWith('en-US'));
+      selectedNativeVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
       pitchMultiplier = 1.0;
       speedMultiplier = 1.0;
     }
@@ -198,17 +201,6 @@ class SpeechService {
 
     utterance.onend = () => {
       this.isSpeaking = false;
-      this.notifyStateChange();
-    };
-
-    utterance.onerror = (err) => {
-      this.isSpeaking = false;
-      this.notifyStateChange();
-      // Ignore normal interruptions when user clicks new voice or aborts
-      if (err.error !== 'interrupted' && err.error !== 'canceled') {
-        console.warn('[TTS] Synthesis error:', err);
-        audioDiagnostics.playDiagnosticChime();
-      }
     };
 
     // Small timeout avoids Chrome cancel race condition

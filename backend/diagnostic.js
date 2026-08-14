@@ -37,25 +37,26 @@ async function runDiagnostics() {
   }
 
   // -------------------------------------------------------------
-  // Test 2: ElevenLabs API Connectivity
+  // Test 2: ElevenLabs API Connectivity & Subscription
   // -------------------------------------------------------------
   console.log('\n[TEST 2/4] Testing ElevenLabs API Connectivity & Subscription...');
-  let userVoices = [];
   if (isKeyPresent) {
     try {
-      const resp = await fetch('https://api.elevenlabs.io/v1/voices', {
+      const resp = await fetch('https://api.elevenlabs.io/v1/user', {
         headers: { 'xi-api-key': apiKey }
       });
 
       if (resp.ok) {
         const data = await resp.json();
-        userVoices = data.voices || [];
-        console.log(`  [PASS] Successfully connected to ElevenLabs API (HTTP 200 OK)`);
-        console.log(`  [INFO] Total voices accessible: ${userVoices.length}`);
+        const tier = data.subscription?.tier || 'Free';
+        const characterCount = data.subscription?.character_count || 0;
+        const characterLimit = data.subscription?.character_limit || 10000;
+        console.log(`  [PASS] Successfully authenticated with ElevenLabs API (HTTP 200 OK)`);
+        console.log(`  [INFO] Subscription Tier: ${tier}, Characters Used: ${characterCount}/${characterLimit}`);
         passedTests++;
       } else {
         const err = await resp.text();
-        console.error(`  [FAIL] ElevenLabs API responded with HTTP ${resp.status}: ${err}`);
+        console.error(`  [FAIL] ElevenLabs API Authentication Error (HTTP ${resp.status}): ${err}`);
       }
     } catch (err) {
       console.error(`  [FAIL] Network connection error to ElevenLabs API: ${err.message}`);
