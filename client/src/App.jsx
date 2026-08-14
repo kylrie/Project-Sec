@@ -129,6 +129,14 @@ export default function App() {
       }
     });
 
+    socketService.on('PLAY_AUDIO', (data) => {
+      if (data.audioStreamUrl) {
+        audioPlaybackService.playStreamUrl(data.audioStreamUrl, data.text, data.voiceId, { speed, pitch, personality });
+      } else if (data.text) {
+        audioPlaybackService.playRawAudio(data.text, data.voiceId, { speed, pitch, personality });
+      }
+    });
+
     socketService.on('TTS_ABORTED', () => {
       audioPlaybackService.stop();
       setStatus('idle');

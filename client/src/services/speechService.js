@@ -120,6 +120,7 @@ class SpeechService {
 
   // HD Voice Selection & Text-To-Speech Synthesis
   async speak(text, options = {}) {
+    console.warn('[SpeechService FALLBACK] Using browser native SpeechSynthesis fallback instead of ElevenLabs HD audio. (Options:', options, ')');
     await audioDiagnostics.unlockAudioContext();
 
     if (!this.synth) {

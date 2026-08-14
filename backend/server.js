@@ -434,6 +434,14 @@ wss.on('connection', (ws) => {
             latency_ms: latencyMs,
             timestamp: Date.now()
           }));
+
+          ws.send(JSON.stringify({
+            type: 'PLAY_AUDIO',
+            audioStreamUrl: audioStreamUrl,
+            text: result.response,
+            voiceId: activeVoice.id,
+            timestamp: Date.now()
+          }));
           break;
         }
 
